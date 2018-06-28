@@ -25,8 +25,7 @@ const Likes = connection.import('./models/users.js');
 const findUser = (user, password) => {
   return Users.findOne({
     attributes: [
-      "id",
-      ["is_admin", "admin"]
+      "id"
     ],
     where: {
       user: user,
@@ -35,6 +34,7 @@ const findUser = (user, password) => {
   }).then(result => result)
     .catch(error => error)
 }
+
 
 const ShowProducts = () => {
   return Products.findAll({
@@ -49,10 +49,30 @@ const ShowProducts = () => {
 }
 
 
+const addProduct = (obj) => {
+ return  Products.create({
+    product_name : obj.name,
+    brand : obj.brand,
+    price : obj.price,
+    quantity : obj.quantity,
+    like_count : obj.likes,
+    aviable : obj.aviable
+  }).then(result => result)
+    .catch(error => error)
+}
+
+const modifyPrice = (id,price) => {
+ return Products.update({
+    price
+  },{where: {id}}).then(result => result)
+                  .catch(error => error)
+}
 
 module.exports = {
   ShowProducts,
+  Users,
   findUser,
-  Users
+  addProduct,
+  modifyPrice
 }
 

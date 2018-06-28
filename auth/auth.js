@@ -1,40 +1,41 @@
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const _ = require('../db/db.js');
-const passportJWT = require('passport-jwt');
-const JWTStrategy   = passportJWT.Strategy;
-const ExtractJWT = passportJWT.ExtractJwt;
-
-passport.use(new LocalStrategy({
-    usernameField: 'user',
-    passwordField: 'pass'
-},
-    (user, password, cb) => {
-        return _.findUser(user, password)
-            .then(user => {
-                if (!user) {
-                    return cb(null, false, { message: 'incorrect user or password' });
-                }
-                return cb(null, user, { message: 'Logged In Successfully' });
-            }).catch(err => cb(err))
-
-    }
-));
+const passportJWT = require("passport-jwt");
+const ExtractJwt = passportJWT.ExtractJwt;
+const JwtStrategy = passportJWT.Strategy;
+const db = require('../db/db.js')
 
 
-passport.use(new JWTStrategy({
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-    secretOrKey   : 'sc2'
-},
-function (jwtPayload, cb) {
+let jwtOptions = {}
 
-    //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
-    return _.Users.findById(jwtPayload.id)
-        .then(user => {
-            return cb(null, user);
-        })
-        .catch(err => {
-            return cb(err);
-        });
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
+jwtOptions.secretOrKey = 'sc2';
+let strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+    console.log('payload received', jwt_payload);
+    //we call the database if returns null we fail the authentication
+    db.Users.findOne({
+        attributes: [
+            "id",
+            ["is_admin","admin"]
+        ],
+        where : {
+            id : jwt_payload.id
+        }
+    }).then(result => {
+        if (result) {
+            next(null, result);
+        } else {
+            next(null, false)
+        }
+    });
+});
+
+passport.use(strategy);
+
+
+
+module.exports = {
+    passport,
+    jwtOptions
 }
-));
+
+
