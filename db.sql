@@ -1,5 +1,5 @@
-create database snack 
-use snack
+create database snack ;
+use snack;
 
 
 create table products(
