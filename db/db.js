@@ -22,6 +22,8 @@ const Products = connection.import('./models/products.js');
 const Users = connection.import('./models/users.js');
 const Likes = connection.import('./models/users.js');
 
+
+
 const findUser = (user, password) => {
   return Users.findOne({
     attributes: [
@@ -36,19 +38,35 @@ const findUser = (user, password) => {
 }
 
 
-const ShowProducts = () => {
+const ShowProducts = (page,range) => {
   return Products.findAll({
+    where: {aviable : 1 },
     attributes: [
       ['product_name', 'Name'],
       ['brand', 'Brand'],
       ['price', 'Price'],
       ['like_count', 'Likes']
-    ]
+    ],
+    limit : page,
+    offset : range,
+    order : Sequilize.literal('product_name')
   }).then(result => result)
     .catch(error => error);
 }
 
-
+const deleteProduct = (id) =>{
+ Products.findById(id).then(result =>{
+   if(result !== null){
+    result.destroy();
+    console.log('product deleted')
+    return true
+   }else{
+     console.log('product not found')
+     return false
+   }
+  
+ })
+}
 const addProduct = (obj) => {
  return  Products.create({
     product_name : obj.name,
@@ -77,6 +95,15 @@ const addUser = (obj) =>{
     .catch(error => error)
 }
 
+const changeProductAv = (id,av) => {
+  return Products.update({
+      aviable: av
+  },{where : {id}}).then(result => result)  
+                    .catch(error => error)
+}
+
+
+
 const addAdmin = (obj) => {
   return Users.create({
     user : obj.username,
@@ -93,7 +120,9 @@ module.exports = {
   addProduct,
   modifyPrice,
   addUser,
-  addAdmin
+  addAdmin,
+  changeProductAv,
+  deleteProduct
 }
 
 

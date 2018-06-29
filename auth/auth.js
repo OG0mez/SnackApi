@@ -4,7 +4,6 @@ const ExtractJwt = passportJWT.ExtractJwt;
 const JwtStrategy = passportJWT.Strategy;
 const db = require('../db/db.js')
 
-
 let jwtOptions = {}
 
 jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');

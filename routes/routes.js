@@ -42,18 +42,27 @@ module.exports = (app) => {
     }),
     //shows products by order
     app.get('/products',(req,res)=>{
-        
-        db.ShowProducts().then(result => {
+        if(req.query.limit && req.query.offset){
+        var limit = Number(req.query.limit);
+        var offset = Number(req.query.offset)
+        }
+        db.ShowProducts(limit,offset).then(result => {
             res.status(200).send(JSON.stringify(result))
         })
     }),
     //change the availability of the products
-    app.patch('/products/availability',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+    app.patch('/products/:id/availability',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
         let admin = req.user.dataValues.admin;
         if(admin === 1){
-            res.send('im logged in and also im an admin')
+            let id = req.params.id;
+            let av = req.body.aviability
+            db.changeProductAv(id,av).then(result => {
+                res.status(204)
+            }).catch(error => {
+                res.status(400)
+            })
         }else{
-            res.send('im not an admin')
+            
         }
         
     }),
@@ -64,7 +73,7 @@ module.exports = (app) => {
         
     }),
     //adds a product
-    app.post('/product/add',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+    app.post('/product',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
         let admin = req.user.dataValues.admin;
         console.log(admin)
         if(admin === 1){
@@ -79,7 +88,7 @@ module.exports = (app) => {
         
     }),
     //change the price of a product
-    app.patch('/product/patch/:id',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+    app.patch('/product/:id',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
         let admin = req.user.dataValues.admin;
         if(admin === 1){
             let id = req.params.id;
@@ -95,16 +104,20 @@ module.exports = (app) => {
         
     }),
     //deletes a product
-    app.delete('/product/delete/:id',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+    app.delete('/product/:id',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
         let admin = req.user.dataValues.admin;
         if(admin === 1){
-            res.send('im logged in and also im an admin')
+            var id =Number(req.params.id)
+            
+          db.deleteProduct(id)
+          
+
         }else{
-            res.send('im not an admin')
+           res.status(403).send('you dont have admin privileges')
         }
         
     }),
-    app.patch('/product/favorite/:id',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+    app.patch('/product/:id/favorite',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
         res.send('im logged in')
     })
 
