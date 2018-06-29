@@ -68,11 +68,32 @@ const modifyPrice = (id,price) => {
                   .catch(error => error)
 }
 
+const addUser = (obj) =>{
+  return Users.create({
+    user : obj.username,
+    pass : obj.password,
+    is_admin : false
+  }).then(result => result)
+    .catch(error => error)
+}
+
+const addAdmin = (obj) => {
+  return Users.create({
+    user : obj.username,
+    pass : obj.password,
+    is_admin : obj.admin
+  }).then(result => result)
+    .catch(error => error )
+}
+
 module.exports = {
   ShowProducts,
   Users,
   findUser,
   addProduct,
-  modifyPrice
+  modifyPrice,
+  addUser,
+  addAdmin
 }
+
 

@@ -20,6 +20,26 @@ module.exports = (app) => {
             res.status(401)
         })
     }),
+    app.post('/signup',(req,res) =>{
+        db.addUser(req.body).then(result => {
+            res.status(200).send('user added')
+        }).catch(error =>{ 
+            res.status(400).send(error);
+        })
+    }),
+    app.post('/admin',j.passport.authenticate('jwt',{session:false}),(req,res) =>{
+        let admin = req.user.dataValues.admin;
+        if(admin === 1){
+           db.addAdmin(req.body).then(result=> {
+               res.status(200).send('user added')
+           }).catch(error => {
+               res.status(400).send(error)
+           })
+        }else{
+            res.status(403).send('admin privileges required')
+        }
+        
+    }),
     //shows products by order
     app.get('/products',(req,res)=>{
         
@@ -51,10 +71,10 @@ module.exports = (app) => {
             db.addProduct(req.body).then(result => {
                 res.status(201).res.send('product added')
             }).catch(error =>{
-                res.status(400)
+                res.status(400).send(error)
             })
         }else{
-            res.status(401)
+            res.status(403).send('admin privileges required')
         }
         
     }),
@@ -65,12 +85,12 @@ module.exports = (app) => {
             let id = req.params.id;
             let price = req.body.price
             db.modifyPrice(id,price).then(result => {
-                res.status(204)
+                res.status(204).send(result)
             }).catch(error => {
-                res.status()
+                res.status(400).send(error)
             })
         }else{
-            res.send('im not an admin')
+            res.status(403).send('you dont have admin privileges')
         }
         
     }),
